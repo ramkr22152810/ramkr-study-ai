@@ -1,1 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Country Chatbot | ramkr-study-ai</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>Country Intelligence Chatbot</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="chatbot.html">Country Chatbot</a>
+    </nav>
+  </header>
+
+  <main class="content">
+    <section class="card chatbot-card">
+      <h2>Ask by Country</h2>
+      <p>
+        Enter a country name. This will call your n8n webhook, which
+        uses SerpAPI + AI to generate a new CSV and insights.
+      </p>
+
+      <div class="chatbot-ui">
+        <input
+          type="text"
+          id="countryInput"
+          placeholder="e.g. Germany, Netherlands, France"
+        />
+        <button id="sendBtn" class="btn">Generate Insights</button>
+      </div>
+
+      <div id="chatStatus" class="status"></div>
+      <pre id="chatResponse" class="response-box"></pre>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Connected to n8n workflow via webhook</p>
+  </footer>
+
+  <script src="assets/js/chatbot.js"></script>
+</body>
+</html>
 
