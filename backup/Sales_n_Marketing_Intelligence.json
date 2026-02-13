@@ -1,0 +1,57 @@
+{
+  "name": "Block F - Sales & Marketing Intelligence",
+  "nodes": [
+    {
+      "id": "OpenAI_SalesMarketing",
+      "name": "OpenAI - Sales & Marketing Intelligence",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [1200, 1500],
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI API"
+        }
+      },
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "type": "system",
+              "text": "You are an AI generating realistic but synthetic sales and marketing intelligence for large IT companies in Europe.\nFor each company provided, return a JSON object with the following fields:\n\nSALES INTELLIGENCE:\n- company_name\n- pipeline_value_eur\n- deals_won\n- deals_lost\n- win_rate_percent\n- sales_cycle_duration_days\n- top_opportunities (array)\n- competitor_involvement_level (Low/Medium/High)\n- sales_forecast_next_quarter_eur\n\nMARKETING INTELLIGENCE:\n- campaign_performance: { awareness, engagement, conversion }\n- lead_conversion_rate_percent\n- website_traffic_monthly\n- event_participation_score\n- brand_awareness_score\n- marketing_roi_percent\n\nRISK INDICATORS:\n- sales_risks: { pipeline_risk, competition_risk, conversion_risk }\n- marketing_risks: { brand_risk, lead_quality_risk, budget_risk }\n\nRules:\n- Output ONLY valid JSON.\n- Numbers must be realistic for large IT companies.\n- Win rate must match deals won/lost.\n- Marketing ROI must be between -50% and +300%.\n\nInput company:\n{{JSON.stringify($json)}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Function_ParseSalesMarketing",
+      "name": "Parse Sales & Marketing JSON",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1440, 1500],
+      "parameters": {
+        "functionCode": "let raw = items[0].json.choices?.[0]?.message?.content || \"{}\";\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  parsed = {};\n}\nreturn [{ json: parsed }];"
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI - Sales & Marketing Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Parse Sales & Marketing JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "block-f-sales-marketing-intel"
+}

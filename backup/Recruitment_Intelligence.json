@@ -1,0 +1,57 @@
+{
+  "name": "Block C - Recruitment Intelligence",
+  "nodes": [
+    {
+      "id": "OpenAI_Recruitment",
+      "name": "OpenAI - Recruitment Intelligence",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [1200, 600],
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI API"
+        }
+      },
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "type": "system",
+              "text": "You are an AI generating realistic but synthetic recruitment intelligence for large IT companies in Europe.\nFor each company provided, return a JSON object with the following fields:\n\n- company_name\n- open_positions\n- hiring_priority (High/Medium/Low)\n- time_to_hire_days\n- cost_per_hire_eur\n- candidate_pipeline: { IT, HR, Sales, AI Engineer, Data Engineer }\n- hiring_regions: { EU, APAC, US }\n- job_type_breakdown: { IT, HR, Sales, AI Engineer, Data Engineer }\n- recruitment_risks: { bottlenecks, shortages, competition }\n\nRules:\n- Output ONLY valid JSON.\n- Numbers must be realistic for large IT companies.\n- Pipeline counts must match open positions.\n\nInput company:\n{{JSON.stringify($json)}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Function_ParseRecruitment",
+      "name": "Parse Recruitment JSON",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1440, 600],
+      "parameters": {
+        "functionCode": "let raw = items[0].json.choices?.[0]?.message?.content || \"{}\";\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  parsed = {};\n}\nreturn [{ json: parsed }];"
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI - Recruitment Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Parse Recruitment JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "block-c-recruitment-intel"
+}

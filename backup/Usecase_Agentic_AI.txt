@@ -1,0 +1,501 @@
+
+
+Your n8n webhook URL - https://n8n.ramkr22152810.com/webhook/company-intel
+Your SerpAPI key - b5a6d7994716755ea0fb696b125d20ee2d0b1f9a19d4a340b26931f33493b750
+Where should the CSV be uploaded? - Google Drive (public link)
+
+Google Drive Credential Name: YYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+
+
+
+----------------------------------------------------------------------------------------
+  
+Absolutely — and I love that you’re thinking big here.  
+**Option A (expanding your existing workflow)** is the right choice if your goal is to build a *true CEO‑grade intelligence engine*.
+
+Let me be direct and clear:
+
+# ⭐ **Your current workflow JSON does NOT yet fulfill the full CEO‑level requirements — but it CAN.**  
+And yes, we can expand it using **multiple OpenAI nodes**, each responsible for a specific intelligence domain.
+
+This is exactly how real enterprise Agentic AI systems are built:  
+**modular, layered, and domain‑specific.**
+
+Let me show you how to evolve your workflow into a **full CEO Intelligence Pipeline**.
+
+---
+
+# 🚀 **Your Expanded Workflow Architecture (CEO‑Grade)**
+
+Below is the architecture I recommend — and I can generate the JSON for each module.
+
+---
+
+# 1️⃣ **Module 1 — Company Discovery (SerpAPI)**  
+Already implemented.
+
+We will keep:
+- Company name  
+- HQ  
+- Website  
+- Snippet  
+- Employee count (approx)  
+- Job roles  
+
+---
+
+# 2️⃣ **Module 2 — Workforce Intelligence (OpenAI Node #1)**  
+This node will generate:
+
+### Workforce & HR Metrics
+- Total employees (validated)  
+- Joinees (monthly/quarterly)  
+- Resignations  
+- Attrition rate  
+- Average tenure  
+- Employee satisfaction score  
+- Skill distribution  
+- Seniority mix  
+- Contract type mix  
+- Diversity metrics  
+- Workforce risk indicators  
+
+This becomes **OpenAI Node #1**.
+
+---
+
+# 3️⃣ **Module 3 — Recruitment Intelligence (OpenAI Node #2)**  
+This node will generate:
+
+### Recruitment & Talent Pipeline
+- Open positions (validated)  
+- Hiring priority  
+- Time to hire  
+- Cost per hire  
+- Candidate pipeline  
+- Hiring regions  
+- Job type breakdown  
+
+This becomes **OpenAI Node #2**.
+
+---
+
+# 4️⃣ **Module 4 — Financial Intelligence (OpenAI Node #3)**  
+This node will generate:
+
+### Financial Metrics
+- Annual revenue  
+- Revenue by region  
+- Profit margin  
+- Cost of workforce  
+- Bench cost  
+- Revenue per employee  
+- Billable vs non‑billable ratio  
+- Forecasted revenue  
+
+This becomes **OpenAI Node #3**.
+
+---
+
+# 5️⃣ **Module 5 — Client & Project Intelligence (OpenAI Node #4)**  
+This node will generate:
+
+### Client Intelligence
+- Active clients  
+- Top clients  
+- Client satisfaction  
+- Client churn  
+
+### Project Intelligence
+- Active projects  
+- Project health (RAG)  
+- SLA performance  
+- Delivery delays  
+- Project profitability  
+
+This becomes **OpenAI Node #4**.
+
+---
+
+# 6️⃣ **Module 6 — Sales & Marketing Intelligence (OpenAI Node #5)**  
+This node will generate:
+
+### Sales
+- Pipeline value  
+- Deals won/lost  
+- Win rate  
+- Sales cycle duration  
+- Top opportunities  
+
+### Marketing
+- Campaign performance  
+- Lead conversion rate  
+- Brand awareness  
+
+This becomes **OpenAI Node #5**.
+
+---
+
+# 7️⃣ **Module 7 — Technology & Capability Intelligence (OpenAI Node #6)**  
+This node will generate:
+
+### Tech Capability
+- Cloud certifications  
+- AI/ML maturity  
+- Cybersecurity maturity  
+- Automation level  
+- Tools & platforms  
+- R&D investments  
+
+This becomes **OpenAI Node #6**.
+
+---
+
+# 8️⃣ **Module 8 — Risk & Compliance Intelligence (OpenAI Node #7)**  
+This node will generate:
+
+### Risk & Compliance
+- GDPR compliance  
+- NIS2 compliance  
+- ISO certifications  
+- Security incidents  
+- Data breach risk  
+- Vendor risk  
+- Operational risks  
+- Financial risks  
+
+This becomes **OpenAI Node #7**.
+
+---
+
+# 9️⃣ **Module 9 — CEO Summary (OpenAI Node #8)**  
+This node will generate:
+
+### CEO‑Level Summary
+- Strategic insights  
+- Workforce risks  
+- Financial risks  
+- Growth opportunities  
+- Recommendations  
+
+This becomes **OpenAI Node #8**.
+
+---
+
+# 🔟 **Module 10 — Merge All Data (Function Node)**  
+We merge all OpenAI outputs into a single JSON object per company.
+
+---
+
+# 1️⃣1️⃣ **Module 11 — CSV Generation**  
+Your existing CSV node stays — but we expand the columns.
+
+---
+
+# 1️⃣2️⃣ **Module 12 — Google Drive Dynamic Folder Upload**  
+Already implemented.
+
+---
+
+# 1️⃣3️⃣ **Module 13 — Webhook Response**  
+Returns:
+- CSV file ID  
+- CEO summary  
+- Status  
+
+---
+We build one workflow, but we generate the JSON in modular blocks:
+
+Block A: Company Discovery
+
+Block B: Workforce Intelligence
+
+Block C: Recruitment Intelligence
+
+Block D: Financial Intelligence
+
+Block E: Client & Project Intelligence
+
+Block F: Sales & Marketing Intelligence
+
+Block G: Technology & Capability Intelligence
+
+Block H: Risk & Compliance Intelligence
+
+Block I: CEO Summary
+
+Block J: CSV + Google Drive Upload
+
+Block K: Webhook Response
+
+Then I combine them into a single workflow inside n8n using:
+
+---------------------------------------- Prompt -------------------------------------------
+BLOCK A — Company Discovery (SerpAPI Query Prompt)
+	top IT companies in {{$json["country"]}} 2024 with more than 5000 employees
+
+BLOCK B — Workforce Intelligence (OpenAI Prompt)
+	You are an AI generating realistic but synthetic workforce intelligence for large IT companies in Europe.
+	For each company provided, return a JSON object with the following fields:
+	- company_name
+	- total_employees
+	- joinees_last_12_months
+	- resignations_last_12_months
+	- attrition_rate
+	- average_tenure_years
+	- employee_satisfaction_score (0-100)
+	- skill_distribution: { IT, HR, Sales, AI Engineer, Data Engineer }
+	- seniority_mix: { Junior, Mid, Senior, Lead, Architect }
+	- contract_type_mix: { FullTime, Contractor, Outsourced }
+	- diversity_metrics: { gender_ratio_female, gender_ratio_male, nationality_count }
+	- workforce_risks: { high_attrition_departments, skill_shortages, overstaffed_areas }
+	Rules:
+	- Output ONLY valid JSON.
+	- Numbers must be realistic for large IT companies.
+	- Skill distribution, seniority mix, and contract type mix must sum to total employees.
+	Input company:
+	{{JSON.stringify($json)}}
+
+BLOCK C — Recruitment Intelligence (OpenAI Prompt)
+	You are an AI generating realistic but synthetic recruitment intelligence for large IT companies in Europe.
+
+	Return a JSON object with:
+
+	- company_name
+	- open_positions
+	- hiring_priority (High/Medium/Low)
+	- time_to_hire_days
+	- cost_per_hire_eur
+	- candidate_pipeline: { IT, HR, Sales, AI Engineer, Data Engineer }
+	- hiring_regions: { EU, APAC, US }
+	- job_type_breakdown: { IT, HR, Sales, AI Engineer, Data Engineer }
+	- recruitment_risks: { bottlenecks, shortages, competition }
+
+	Rules:
+	- Output ONLY valid JSON.
+	- Pipeline counts must match open positions.
+
+	Input company:
+	{{JSON.stringify($json)}}
+
+BLOCK D — Financial Intelligence (OpenAI Prompt)
+	You are an AI generating realistic but synthetic financial intelligence for large IT companies in Europe.
+
+	Return a JSON object with:
+
+	- company_name
+	- annual_revenue_eur
+	- revenue_by_region: { EU, APAC, US }
+	- revenue_by_service_line: { Cloud, AI, Support, Consulting, Cybersecurity }
+	- profit_margin_percent
+	- cost_of_workforce_eur
+	- bench_cost_eur
+	- revenue_per_employee
+	- cost_per_employee
+	- billable_ratio_percent
+	- non_billable_ratio_percent
+	- forecasted_revenue_next_12_months_eur
+	- financial_risks: { stability, cash_flow_risk, margin_pressure_risk, revenue_concentration_risk }
+
+	Rules:
+	- Output ONLY valid JSON.
+	- Billable + non-billable must equal 100.
+
+	Input company:
+	{{JSON.stringify($json)}}
+
+BLOCK E — Client & Project Intelligence (OpenAI Prompt)
+	You are an AI generating realistic but synthetic client and project intelligence for large IT companies in Europe.
+
+	Return a JSON object with:
+
+	CLIENT INTELLIGENCE:
+	- company_name
+	- active_clients
+	- top_clients (array)
+	- client_satisfaction_score (0-100)
+	- client_churn_rate_percent
+	- industry_segments (array)
+
+	PROJECT INTELLIGENCE:
+	- active_projects
+	- project_health_rag: { green, amber, red }
+	- sla_performance_percent
+	- delivery_delays_percent
+	- resource_allocation_efficiency_percent
+	- project_profitability_percent
+
+	RISK INDICATORS:
+	- client_risks: { churn_risk, dependency_risk, satisfaction_risk }
+	- project_risks: { delivery_risk, staffing_risk, budget_risk }
+
+	Rules:
+	- Output ONLY valid JSON.
+
+	Input company:
+	{{JSON.stringify($json)}}
+
+BLOCK F — Sales & Marketing Intelligence (OpenAI Prompt)
+	You are an AI generating realistic but synthetic sales and marketing intelligence for large IT companies in Europe.
+
+	Return a JSON object with:
+
+	SALES INTELLIGENCE:
+	- company_name
+	- pipeline_value_eur
+	- deals_won
+	- deals_lost
+	- win_rate_percent
+	- sales_cycle_duration_days
+	- top_opportunities (array)
+	- competitor_involvement_level (Low/Medium/High)
+	- sales_forecast_next_quarter_eur
+
+	MARKETING INTELLIGENCE:
+	- campaign_performance: { awareness, engagement, conversion }
+	- lead_conversion_rate_percent
+	- website_traffic_monthly
+	- event_participation_score
+	- brand_awareness_score
+	- marketing_roi_percent
+
+	RISK INDICATORS:
+	- sales_risks: { pipeline_risk, competition_risk, conversion_risk }
+	- marketing_risks: { brand_risk, lead_quality_risk, budget_risk }
+
+	Rules:
+	- Output ONLY valid JSON.
+
+	Input company:
+	{{JSON.stringify($json)}}
+
+BLOCK G — Technology & Capability Intelligence (OpenAI Prompt)
+	You are an AI generating realistic but synthetic technology and capability intelligence for large IT companies in Europe.
+
+	Return a JSON object with:
+
+	TECHNOLOGY CAPABILITY:
+	- company_name
+	- cloud_certifications: { AWS, Azure, GCP }
+	- ai_ml_maturity_level (1-5)
+	- cybersecurity_maturity_level (1-5)
+	- automation_level_percent
+	- devops_maturity_level (1-5)
+	- tools_and_platforms (array)
+	- r_and_d_investment_eur
+	- tech_stack_modernization_score (0-100)
+
+	INNOVATION INDICATORS:
+	- innovation_index (0-100)
+	- patents_last_3_years
+	- emerging_tech_initiatives (array)
+
+	TECHNOLOGY RISKS:
+	- tech_risks: { legacy_system_risk, cybersecurity_risk, skill_gap_risk }
+
+	Rules:
+	- Output ONLY valid JSON.
+
+	Input company:
+	{{JSON.stringify($json)}}
+
+BLOCK H — Risk & Compliance Intelligence (OpenAI Prompt)
+	You are an AI generating realistic but synthetic risk and compliance intelligence for large IT companies in Europe.
+
+	Return a JSON object with:
+
+	COMPLIANCE:
+	- company_name
+	- gdpr_compliance_status
+	- nis2_readiness_level (0-100)
+	- iso_certifications: { ISO27001, ISO9001, ISO20000 }
+	- audit_findings_last_year
+
+	CYBERSECURITY:
+	- security_incidents_last_12_months
+	- data_breach_risk_level
+	- vulnerability_score (0-100)
+	- cybersecurity_risks: { phishing, ransomware, insider_threat }
+
+	OPERATIONAL RISK:
+	- operational_risk_level
+	- vendor_risk_level
+	- supply_chain_risk
+	- business_continuity_maturity (1-5)
+
+	FINANCIAL RISK:
+	- financial_risk_level
+	- liquidity_risk
+	- revenue_concentration_risk
+	- cost_overrun_risk
+
+	REGULATORY RISK:
+	- regulatory_changes_impact_score (0-100)
+	- compliance_risks: { fines_risk, audit_risk, reporting_risk }
+
+	Rules:
+	- Output ONLY valid JSON.
+
+	Input company:
+	{{JSON.stringify($json)}}
+
+BLOCK I — CEO Summary (OpenAI Prompt)
+	You are an AI generating a CEO-level strategic summary for a large European IT company.
+
+	You will receive a JSON object containing:
+	- Workforce Intelligence
+	- Recruitment Intelligence
+	- Financial Intelligence
+	- Client & Project Intelligence
+	- Sales & Marketing Intelligence
+	- Technology & Capability Intelligence
+	- Risk & Compliance Intelligence
+
+	Produce a structured CEO summary with:
+
+	1. Executive Summary (3–5 sentences)
+	2. Key Strengths
+	3. Key Risks
+	4. Opportunities
+	5. Recommended CEO Actions
+
+	Rules:
+	- Output ONLY valid JSON.
+	- Be concise but strategic.
+	- Use business language suitable for a CEO.
+
+	Input data:
+	{{JSON.stringify($json)}}
+
+BLOCK J — Flatten JSON (Function Node Prompt)
+	function flatten(obj, prefix = '') {
+	  let result = {};
+	  for (const key in obj) {
+		const value = obj[key];
+		const newKey = prefix ? `${prefix}_${key}` : key;
+		if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+		  Object.assign(result, flatten(value, newKey));
+		} else {
+		  result[newKey] = Array.isArray(value) ? JSON.stringify(value) : value;
+		}
+	  }
+	  return result;
+	}
+
+	return items.map(item => ({ json: flatten(item.json) }));
+
+BLOCK K — Build Webhook Response (Function Node Prompt)
+	const driveFile = $node["Drive: Upload CSV"].json;
+	const ceoSummary = $node["Parse CEO Summary JSON"].json;
+
+	return [{
+	  json: {
+		status: "success",
+		message: "Company intelligence generated successfully.",
+		country: $items(0)[0].json.country || null,
+		csv_file_id: driveFile.id || null,
+		csv_file_name: driveFile.name || null,
+		ceo_summary: ceoSummary || {},
+		timestamp: $now().toISO()
+	  }
+	}];

@@ -1,0 +1,168 @@
+{
+  "name": "Block J - CSV + Google Drive Upload",
+  "nodes": [
+    {
+      "id": "Function_FlattenForCSV",
+      "name": "Flatten JSON for CSV",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1200, 2700],
+      "parameters": {
+        "functionCode": "function flatten(obj, prefix = '') {\n  let result = {};\n  for (const key in obj) {\n    const value = obj[key];\n    const newKey = prefix ? `${prefix}_${key}` : key;\n    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {\n      Object.assign(result, flatten(value, newKey));\n    } else {\n      result[newKey] = Array.isArray(value) ? JSON.stringify(value) : value;\n    }\n  }\n  return result;\n}\n\nreturn items.map(item => ({ json: flatten(item.json) }));"
+      }
+    },
+    {
+      "id": "Spreadsheet_ToCSV",
+      "name": "JSON → CSV",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 3,
+      "position": [1440, 2700],
+      "parameters": {
+        "operation": "toFile",
+        "fileFormat": "csv",
+        "options": {
+          "fileName": "={{$now().format('YYYY-MM-DD_HH-mm-ss')}}.csv"
+        }
+      }
+    },
+    {
+      "id": "Set_Dates_For_Drive",
+      "name": "Set Dates for Drive",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [1680, 2700],
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [
+            {
+              "name": "today",
+              "value": "={{$now().format('YYYY-MM-DD')}}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{$now().format('YYYY-MM-DD_HH-mm-ss')}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Drive_CreateRootFolder",
+      "name": "Drive: Ensure company-intel",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1920, 2600],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "Google Drive OAuth"
+        }
+      },
+      "parameters": {
+        "operation": "createFolder",
+        "parentId": "root",
+        "name": "company-intel"
+      }
+    },
+    {
+      "id": "Drive_CreateDateFolder",
+      "name": "Drive: Create Date Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [2160, 2600],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "Google Drive OAuth"
+        }
+      },
+      "parameters": {
+        "operation": "createFolder",
+        "parentId": "={{$node[\"Drive: Ensure company-intel\"].json[\"id\"]}}",
+        "name": "={{$node[\"Set Dates for Drive\"].json[\"today\"]}}"
+      }
+    },
+    {
+      "id": "Drive_UploadCSV",
+      "name": "Drive: Upload CSV",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [2400, 2600],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "Google Drive OAuth"
+        }
+      },
+      "parameters": {
+        "operation": "upload",
+        "binaryData": true,
+        "fileName": "={{$node[\"Set Dates for Drive\"].json[\"timestamp\"]}}.csv",
+        "parentId": "={{$node[\"Drive: Create Date Folder\"].json[\"id\"]}}",
+        "binaryPropertyName": "data"
+      }
+    }
+  ],
+  "connections": {
+    "Flatten JSON for CSV": {
+      "main": [
+        [
+          {
+            "node": "JSON → CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON → CSV": {
+      "main": [
+        [
+          {
+            "node": "Set Dates for Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Dates for Drive": {
+      "main": [
+        [
+          {
+            "node": "Drive: Ensure company-intel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive: Ensure company-intel": {
+      "main": [
+        [
+          {
+            "node": "Drive: Create Date Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive: Create Date Folder": {
+      "main": [
+        [
+          {
+            "node": "Drive: Upload CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "block-j-csv-drive-upload"
+}

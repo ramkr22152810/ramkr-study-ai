@@ -1,0 +1,57 @@
+{
+  "name": "Block I - CEO Summary",
+  "nodes": [
+    {
+      "id": "OpenAI_CEOSummary",
+      "name": "OpenAI - CEO Summary",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [1200, 2400],
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI API"
+        }
+      },
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "type": "system",
+              "text": "You are an AI generating a CEO-level strategic summary for a large European IT company.\nYou will receive a JSON object containing:\n- Workforce Intelligence\n- Recruitment Intelligence\n- Financial Intelligence\n- Client & Project Intelligence\n- Sales & Marketing Intelligence\n- Technology & Capability Intelligence\n- Risk & Compliance Intelligence\n\nYour task:\nProduce a structured CEO summary with the following sections:\n\n1. Executive Summary (3–5 sentences)\n2. Key Strengths\n3. Key Risks\n4. Opportunities\n5. Recommended CEO Actions\n\nRules:\n- Output ONLY valid JSON.\n- Be concise but strategic.\n- Highlight the most important insights.\n- Use business language suitable for a CEO.\n\nInput data:\n{{JSON.stringify($json)}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Function_ParseCEOSummary",
+      "name": "Parse CEO Summary JSON",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1440, 2400],
+      "parameters": {
+        "functionCode": "let raw = items[0].json.choices?.[0]?.message?.content || \"{}\";\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  parsed = {};\n}\nreturn [{ json: parsed }];"
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI - CEO Summary": {
+      "main": [
+        [
+          {
+            "node": "Parse CEO Summary JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "block-i-ceo-summary"
+}

@@ -1,0 +1,57 @@
+{
+  "name": "Block D - Financial Intelligence",
+  "nodes": [
+    {
+      "id": "OpenAI_Financial",
+      "name": "OpenAI - Financial Intelligence",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [1200, 900],
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI API"
+        }
+      },
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "type": "system",
+              "text": "You are an AI generating realistic but synthetic financial intelligence for large IT companies in Europe.\nFor each company provided, return a JSON object with the following fields:\n\n- company_name\n- annual_revenue_eur\n- revenue_by_region: { EU, APAC, US }\n- revenue_by_service_line: { Cloud, AI, Support, Consulting, Cybersecurity }\n- profit_margin_percent\n- cost_of_workforce_eur\n- bench_cost_eur\n- revenue_per_employee\n- cost_per_employee\n- billable_ratio_percent\n- non_billable_ratio_percent\n- forecasted_revenue_next_12_months_eur\n- financial_risks: { stability, cash_flow_risk, margin_pressure_risk, revenue_concentration_risk }\n\nRules:\n- Output ONLY valid JSON.\n- Numbers must be realistic for large IT companies.\n- Revenue per employee must match revenue and employee count.\n- Billable + non-billable must equal 100.\n\nInput company:\n{{JSON.stringify($json)}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Function_ParseFinancial",
+      "name": "Parse Financial JSON",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1440, 900],
+      "parameters": {
+        "functionCode": "let raw = items[0].json.choices?.[0]?.message?.content || \"{}\";\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  parsed = {};\n}\nreturn [{ json: parsed }];"
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI - Financial Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Parse Financial JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "block-d-financial-intel"
+}

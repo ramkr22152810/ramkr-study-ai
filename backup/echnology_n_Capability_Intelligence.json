@@ -1,0 +1,57 @@
+{
+  "name": "Block G - Technology & Capability Intelligence",
+  "nodes": [
+    {
+      "id": "OpenAI_TechCapability",
+      "name": "OpenAI - Technology & Capability Intelligence",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [1200, 1800],
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI API"
+        }
+      },
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "type": "system",
+              "text": "You are an AI generating realistic but synthetic technology and capability intelligence for large IT companies in Europe.\nFor each company provided, return a JSON object with the following fields:\n\nTECHNOLOGY CAPABILITY:\n- company_name\n- cloud_certifications: { AWS, Azure, GCP }\n- ai_ml_maturity_level (1-5)\n- cybersecurity_maturity_level (1-5)\n- automation_level_percent\n- devops_maturity_level (1-5)\n- tools_and_platforms (array)\n- r_and_d_investment_eur\n- tech_stack_modernization_score (0-100)\n\nINNOVATION INDICATORS:\n- innovation_index (0-100)\n- patents_last_3_years\n- emerging_tech_initiatives (array)\n\nTECHNOLOGY RISKS:\n- tech_risks: { legacy_system_risk, cybersecurity_risk, skill_gap_risk }\n\nRules:\n- Output ONLY valid JSON.\n- Numbers must be realistic for large IT companies.\n- Maturity levels must be between 1 and 5.\n- Percentages must be between 0 and 100.\n\nInput company:\n{{JSON.stringify($json)}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Function_ParseTechCapability",
+      "name": "Parse Technology & Capability JSON",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1440, 1800],
+      "parameters": {
+        "functionCode": "let raw = items[0].json.choices?.[0]?.message?.content || \"{}\";\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  parsed = {};\n}\nreturn [{ json: parsed }];"
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI - Technology & Capability Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Parse Technology & Capability JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "block-g-tech-capability-intel"
+}

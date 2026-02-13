@@ -1,0 +1,47 @@
+{
+  "name": "Block K - Webhook Response",
+  "nodes": [
+    {
+      "id": "Function_BuildResponse",
+      "name": "Build Webhook Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1200, 3000],
+      "parameters": {
+        "functionCode": "const driveFile = $node[\"Drive: Upload CSV\"].json;\nconst ceoSummary = $node[\"Parse CEO Summary JSON\"].json;\n\nreturn [{\n  json: {\n    status: \"success\",\n    message: \"Company intelligence generated successfully.\",\n    country: $items(0)[0].json.country || null,\n    csv_file_id: driveFile.id || null,\n    csv_file_name: driveFile.name || null,\n    ceo_summary: ceoSummary || {},\n    timestamp: $now().toISO()\n  }\n}];"
+      }
+    },
+    {
+      "id": "Webhook_Response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [1440, 3000],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "company-intel-response",
+        "responseMode": "lastNode",
+        "options": {
+          "responseContentType": "application/json"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Build Webhook Response": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "block-k-webhook-response"
+}

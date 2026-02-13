@@ -1,0 +1,120 @@
+{
+  "name": "Block A - Company Discovery",
+  "nodes": [
+    {
+      "id": "Webhook_Trigger",
+      "name": "Webhook - Country Input",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [260, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "company-intel",
+        "responseMode": "onReceived",
+        "options": {
+          "responseContentType": "application/json"
+        }
+      },
+      "webhookId": "company-intel-webhook"
+    },
+    {
+      "id": "Set_Country",
+      "name": "Set Country",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [480, 300],
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [
+            {
+              "name": "country",
+              "value": "={{$json[\"body\"][\"country\"] || $json[\"country\"]}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "SerpAPI_Search",
+      "name": "SerpAPI Search Companies",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [720, 300],
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "method": "GET",
+        "queryParametersUi": {
+          "parameter": [
+            {
+              "name": "engine",
+              "value": "google"
+            },
+            {
+              "name": "q",
+              "value": "={{`top IT companies in ${$json[\"country\"]} 2024`}}"
+            },
+            {
+              "name": "api_key",
+              "value": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            },
+            {
+              "name": "num",
+              "value": "10"
+            }
+          ]
+        },
+        "responseFormat": "json"
+      }
+    },
+    {
+      "id": "Normalize_Companies",
+      "name": "Normalize Companies",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [960, 300],
+      "parameters": {
+        "functionCode": "const results = items[0].json.organic_results || [];\nreturn results.map(r => {\n  const title = r.title || \"\";\n  const companyName = title.replace(/ - .*/, \"\");\n  return {\n    json: {\n      company_name: companyName,\n      country: $items(0)[0].json.country,\n      source_url: r.link || \"\",\n      snippet: r.snippet || \"\"\n    }\n  };\n});"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook - Country Input": {
+      "main": [
+        [
+          {
+            "node": "Set Country",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Country": {
+      "main": [
+        [
+          {
+            "node": "SerpAPI Search Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI Search Companies": {
+      "main": [
+        [
+          {
+            "node": "Normalize Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "block-a-company-discovery"
+}

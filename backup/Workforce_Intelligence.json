@@ -1,0 +1,57 @@
+{
+  "name": "Block B - Workforce Intelligence",
+  "nodes": [
+    {
+      "id": "OpenAI_Workforce",
+      "name": "OpenAI - Workforce Intelligence",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [1200, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI API"
+        }
+      },
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "type": "system",
+              "text": "You are an AI generating realistic but synthetic workforce intelligence for large IT companies in Europe.\nFor each company provided, return a JSON object with the following fields:\n\n- company_name\n- total_employees\n- joinees_last_12_months\n- resignations_last_12_months\n- attrition_rate\n- average_tenure_years\n- employee_satisfaction_score (0-100)\n- skill_distribution: { IT, HR, Sales, AI Engineer, Data Engineer }\n- seniority_mix: { Junior, Mid, Senior, Lead, Architect }\n- contract_type_mix: { FullTime, Contractor, Outsourced }\n- diversity_metrics: { gender_ratio_female, gender_ratio_male, nationality_count }\n- workforce_risks: { high_attrition_departments, skill_shortages, overstaffed_areas }\n\nRules:\n- Output ONLY valid JSON.\n- Numbers must be realistic for large IT companies.\n- Attrition rate must match joinees/resignations.\n- Skill distribution must sum to total employees.\n- Seniority mix must sum to total employees.\n- Contract type mix must sum to total employees.\n\nInput company:\n{{JSON.stringify($json)}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Function_ParseWorkforce",
+      "name": "Parse Workforce JSON",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1440, 300],
+      "parameters": {
+        "functionCode": "let raw = items[0].json.choices?.[0]?.message?.content || \"{}\";\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  parsed = {};\n}\nreturn [{ json: parsed }];"
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI - Workforce Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Parse Workforce JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "block-b-workforce-intel"
+}

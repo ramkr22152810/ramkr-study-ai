@@ -1,0 +1,57 @@
+{
+  "name": "Block E - Client & Project Intelligence",
+  "nodes": [
+    {
+      "id": "OpenAI_ClientProject",
+      "name": "OpenAI - Client & Project Intelligence",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [1200, 1200],
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI API"
+        }
+      },
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "type": "system",
+              "text": "You are an AI generating realistic but synthetic client and project intelligence for large IT companies in Europe.\nFor each company provided, return a JSON object with the following fields:\n\nCLIENT INTELLIGENCE:\n- company_name\n- active_clients\n- top_clients (array of 3–5 names)\n- client_satisfaction_score (0-100)\n- client_churn_rate_percent\n- industry_segments (array)\n\nPROJECT INTELLIGENCE:\n- active_projects\n- project_health_rag: { green, amber, red }\n- sla_performance_percent\n- delivery_delays_percent\n- resource_allocation_efficiency_percent\n- project_profitability_percent\n\nRISK INDICATORS:\n- client_risks: { churn_risk, dependency_risk, satisfaction_risk }\n- project_risks: { delivery_risk, staffing_risk, budget_risk }\n\nRules:\n- Output ONLY valid JSON.\n- Numbers must be realistic for large IT companies.\n- RAG values must reflect realistic project distributions.\n\nInput company:\n{{JSON.stringify($json)}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Function_ParseClientProject",
+      "name": "Parse Client & Project JSON",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1440, 1200],
+      "parameters": {
+        "functionCode": "let raw = items[0].json.choices?.[0]?.message?.content || \"{}\";\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  parsed = {};\n}\nreturn [{ json: parsed }];"
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI - Client & Project Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Parse Client & Project JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "block-e-client-project-intel"
+}

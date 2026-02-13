@@ -1,0 +1,475 @@
+{
+  "name": "Country → Company Intelligence → CSV → Google Drive",
+  "nodes": [
+    {
+      "id": "Webhook_Trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [260, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "company-intel",
+        "responseMode": "onReceived",
+        "options": {
+          "responseContentType": "application/json"
+        }
+      },
+      "webhookId": "company-intel-webhook"
+    },
+    {
+      "id": "Set_Dates",
+      "name": "Set Dates",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [480, 300],
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [
+            {
+              "name": "country",
+              "value": "={{$json[\"body\"][\"country\"] || $json[\"country\"]}}"
+            },
+            {
+              "name": "today",
+              "value": "={{$now().format('YYYY-MM-DD')}}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{$now().format('YYYY-MM-DD_HH-mm-ss')}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "SerpAPI_Search",
+      "name": "SerpAPI Search Companies",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [720, 300],
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "method": "GET",
+        "queryParametersUi": {
+          "parameter": [
+            {
+              "name": "engine",
+              "value": "google"
+            },
+            {
+              "name": "q",
+              "value": "={{`top IT companies in ${$json[\"country\"]} 2024`}}"
+            },
+            {
+              "name": "api_key",
+              "value": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            },
+            {
+              "name": "num",
+              "value": "10"
+            }
+          ]
+        },
+        "responseFormat": "json"
+      }
+    },
+    {
+      "id": "Function_Normalize",
+      "name": "Normalize Companies",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [960, 300],
+      "parameters": {
+        "functionCode": "const results = items[0].json.organic_results || [];\nreturn results.map(r => {\n  const title = r.title || \"\";\n  const companyName = title.replace(/ - .*/, \"\");\n  return {\n    json: {\n      company_name: companyName,\n      source_url: r.link || \"\",\n      snippet: r.snippet || \"\",\n    }\n  };\n});"
+      }
+    },
+    {
+      "id": "OpenAI_Enrich",
+      "name": "OpenAI Enrich Metrics",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [1200, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI API"
+        }
+      },
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "options": {},
+        "messages": {
+          "values": [
+            {
+              "text": "You are generating synthetic internal HR metrics for demo purposes.\nFor each company in the JSON array below, generate a JSON array with the same length.\nEach element must contain:\n- company_name (same as input)\n- joinees_last_12_months (integer)\n- resigned_last_12_months (integer)\n- attrition_rate (percentage number, 0-100)\n- job_type_distribution (object with keys: IT, HR, Sales, AI Engineer, Data Engineer; values are integers)\n- growth_signal (Growing, Stable, or Shrinking)\n- risk_signal (Low, Medium, or High)\n\nReturn ONLY valid JSON, no explanation.\n\nInput companies:\n{{JSON.stringify($items().map(i => i.json))}}",
+              "type": "system"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Function_Merge",
+      "name": "Merge Public + AI Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1440, 300],
+      "parameters": {
+        "functionCode": "const publicCompanies = $items(0).map(i => i.json);\nconst aiRaw = items[1].json.choices?.[0]?.message?.content || items[1].json.data || \"[]\";\nlet aiArray;\ntry {\n  aiArray = JSON.parse(aiRaw);\n} catch (e) {\n  aiArray = [];\n}\n\nconst merged = [];\nfor (let i = 0; i < publicCompanies.length; i++) {\n  const pub = publicCompanies[i] || {};\n  const ai = aiArray[i] || {};\n  merged.push({\n    json: {\n      country: $items(2)[0].json.country,\n      company_name: pub.company_name || ai.company_name || \"\",\n      source_url: pub.source_url || \"\",\n      snippet: pub.snippet || \"\",\n      joinees_last_12_months: ai.joinees_last_12_months || 0,\n      resigned_last_12_months: ai.resigned_last_12_months || 0,\n      attrition_rate: ai.attrition_rate || 0,\n      job_type_distribution: ai.job_type_distribution || {},\n      growth_signal: ai.growth_signal || \"Unknown\",\n      risk_signal: ai.risk_signal || \"Unknown\"\n    }\n  });\n}\nreturn merged;"
+      }
+    },
+    {
+      "id": "Set_For_CSV",
+      "name": "Prepare for CSV",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [1680, 300],
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [
+            {
+              "name": "country",
+              "value": "={{$json[\"country\"]}}"
+            },
+            {
+              "name": "company_name",
+              "value": "={{$json[\"company_name\"]}}"
+            },
+            {
+              "name": "source_url",
+              "value": "={{$json[\"source_url\"]}}"
+            },
+            {
+              "name": "snippet",
+              "value": "={{$json[\"snippet\"]}}"
+            },
+            {
+              "name": "joinees_last_12_months",
+              "value": "={{$json[\"joinees_last_12_months\"]}}"
+            },
+            {
+              "name": "resigned_last_12_months",
+              "value": "={{$json[\"resigned_last_12_months\"]}}"
+            },
+            {
+              "name": "attrition_rate",
+              "value": "={{$json[\"attrition_rate\"]}}"
+            },
+            {
+              "name": "growth_signal",
+              "value": "={{$json[\"growth_signal\"]}}"
+            },
+            {
+              "name": "risk_signal",
+              "value": "={{$json[\"risk_signal\"]}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Spreadsheet_CSV",
+      "name": "JSON → CSV",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 3,
+      "position": [1920, 300],
+      "parameters": {
+        "operation": "toFile",
+        "fileFormat": "csv",
+        "options": {
+          "fileName": "={{$json[\"timestamp\"] || $now().format('YYYY-MM-DD_HH-mm-ss')}}.csv"
+        }
+      }
+    },
+    {
+      "id": "Set_Dates_For_Drive",
+      "name": "Set Dates for Drive",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [2160, 300],
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [
+            {
+              "name": "today",
+              "value": "={{$now().format('YYYY-MM-DD')}}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{$now().format('YYYY-MM-DD_HH-mm-ss')}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Drive_CreateRootFolder",
+      "name": "Drive: Ensure company-intel",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [2400, 220],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "YYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+        }
+      },
+      "parameters": {
+        "operation": "createFolder",
+        "parentId": "root",
+        "name": "company-intel"
+      }
+    },
+    {
+      "id": "Drive_CreateDateFolder",
+      "name": "Drive: Create Date Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [2640, 220],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "YYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+        }
+      },
+      "parameters": {
+        "operation": "createFolder",
+        "parentId": "={{$node[\"Drive: Ensure company-intel\"].json[\"id\"]}}",
+        "name": "={{$node[\"Set Dates for Drive\"].json[\"today\"]}}"
+      }
+    },
+    {
+      "id": "Drive_UploadCSV",
+      "name": "Drive: Upload CSV",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [2880, 220],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "YYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+        }
+      },
+      "parameters": {
+        "operation": "upload",
+        "binaryData": true,
+        "fileName": "={{$node[\"Set Dates for Drive\"].json[\"timestamp\"]}}.csv",
+        "parentId": "={{$node[\"Drive: Create Date Folder\"].json[\"id\"]}}",
+        "binaryPropertyName": "data"
+      }
+    },
+    {
+      "id": "OpenAI_Summary",
+      "name": "OpenAI CEO Summary",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [2400, 420],
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI API"
+        }
+      },
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "text": "You are an AI assistant summarizing company intelligence for a CEO.\nGiven the following JSON array of companies with HR metrics, write a concise summary with:\n- Top growth companies\n- High-risk companies\n- Hiring trends\n- Workforce signals\n- Strategic recommendations\n\nReturn a short, structured text.\n\nData:\n{{JSON.stringify($items().map(i => i.json))}}",
+              "type": "system"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Webhook_Response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [3120, 420],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "company-intel-response",
+        "responseMode": "onReceived",
+        "options": {
+          "responseContentType": "application/json"
+        }
+      }
+    },
+    {
+      "id": "Function_Response",
+      "name": "Build Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [2880, 420],
+      "parameters": {
+        "functionCode": "const driveFile = $node[\"Drive: Upload CSV\"].json;\nconst summary = $node[\"OpenAI CEO Summary\"].json.choices?.[0]?.message?.content || \"\";\n\n// Public link may require you to manually enable link sharing in Drive\n// and/or add another node to create a shareable link.\n\nreturn [{\n  json: {\n    status: \"success\",\n    country: $items(0)[0].json.country || \"\",\n    csv_file_id: driveFile.id || null,\n    csv_name: driveFile.name || null,\n    summary\n  }\n}];"
+      }
+    }
+  ],
+  "connections": {
+    "Set Dates": {
+      "main": [
+        [
+          {
+            "node": "SerpAPI Search Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Dates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI Search Companies": {
+      "main": [
+        [
+          {
+            "node": "Normalize Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Companies": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Enrich Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Enrich Metrics": {
+      "main": [
+        [
+          {
+            "node": "Merge Public + AI Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Public + AI Data": {
+      "main": [
+        [
+          {
+            "node": "Prepare for CSV",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "OpenAI CEO Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare for CSV": {
+      "main": [
+        [
+          {
+            "node": "JSON → CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON → CSV": {
+      "main": [
+        [
+          {
+            "node": "Set Dates for Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Dates for Drive": {
+      "main": [
+        [
+          {
+            "node": "Drive: Ensure company-intel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive: Ensure company-intel": {
+      "main": [
+        [
+          {
+            "node": "Drive: Create Date Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive: Create Date Folder": {
+      "main": [
+        [
+          {
+            "node": "Drive: Upload CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI CEO Summary": {
+      "main": [
+        [
+          {
+            "node": "Build Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Response": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "ramkr-study-ai"
+  },
+  "id": "country-company-intel-workflow"
+}

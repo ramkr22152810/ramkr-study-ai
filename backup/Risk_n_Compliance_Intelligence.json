@@ -1,0 +1,57 @@
+{
+  "name": "Block H - Risk & Compliance Intelligence",
+  "nodes": [
+    {
+      "id": "OpenAI_RiskCompliance",
+      "name": "OpenAI - Risk & Compliance Intelligence",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [1200, 2100],
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAI API"
+        }
+      },
+      "parameters": {
+        "operation": "chat",
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "type": "system",
+              "text": "You are an AI generating realistic but synthetic risk and compliance intelligence for large IT companies in Europe.\nFor each company provided, return a JSON object with the following fields:\n\nCOMPLIANCE INTELLIGENCE:\n- company_name\n- gdpr_compliance_status (Compliant, Partially Compliant, Non-Compliant)\n- nis2_readiness_level (0-100)\n- iso_certifications: { ISO27001, ISO9001, ISO20000 }\n- audit_findings_last_year\n\nCYBERSECURITY RISK:\n- security_incidents_last_12_months\n- data_breach_risk_level (Low/Medium/High)\n- vulnerability_score (0-100)\n- cybersecurity_risks: { phishing, ransomware, insider_threat }\n\nOPERATIONAL RISK:\n- operational_risk_level (Low/Medium/High)\n- vendor_risk_level (Low/Medium/High)\n- supply_chain_risk (Low/Medium/High)\n- business_continuity_maturity (1-5)\n\nFINANCIAL RISK:\n- financial_risk_level (Low/Medium/High)\n- liquidity_risk (Low/Medium/High)\n- revenue_concentration_risk (Low/Medium/High)\n- cost_overrun_risk (Low/Medium/High)\n\nREGULATORY RISK:\n- regulatory_changes_impact_score (0-100)\n- compliance_risks: { fines_risk, audit_risk, reporting_risk }\n\nRules:\n- Output ONLY valid JSON.\n- Numbers must be realistic for large IT companies.\n- Risk levels must be Low, Medium, or High.\n- Percentages must be between 0 and 100.\n\nInput company:\n{{JSON.stringify($json)}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "Function_ParseRiskCompliance",
+      "name": "Parse Risk & Compliance JSON",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [1440, 2100],
+      "parameters": {
+        "functionCode": "let raw = items[0].json.choices?.[0]?.message?.content || \"{}\";\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  parsed = {};\n}\nreturn [{ json: parsed }];"
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI - Risk & Compliance Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Parse Risk & Compliance JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "block-h-risk-compliance-intel"
+}
